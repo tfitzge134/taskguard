@@ -1,66 +1,80 @@
-import datetime
+"""TaskGuard ADK agent configuration."""
+
+from __future__ import annotations
+
 import os
-from zoneinfo import ZoneInfo
 
-import google.auth
 from google.genai import types
-
 from google.adk.agents import Agent
 from google.adk.apps import App
 from google.adk.models.google_llm import Gemini
 
-
-_, project_id = google.auth.default()
-os.environ["GOOGLE_CLOUD_PROJECT"] = project_id
-os.environ["GOOGLE_CLOUD_LOCATION"] = "global"
-os.environ["GOOGLE_GENAI_USE_VERTEXAI"] = "True"
+from .tools import run_schema_validation
 
 
-def get_weather(query: str) -> str:
-    """Simulates a web search. Use it to get information on weather.
+# Use Google AI Studio instead of Vertex AI.
+os.environ["GOOGLE_GENAI_USE_VERTEXAI"] = "FALSE"
 
-    Args:
-        query: A string containing the location to get weather information for.
-
-    Returns:
-        A string with the simulated weather information for the queried location.
-    """
-    if "sf" in query.lower() or "san francisco" in query.lower():
-        return "It's 60 degrees and foggy."
-    return "It's 90 degrees and sunny."
+if not (
+    os.getenv("GEMINI_API_KEY")
+    or os.getenv("GOOGLE_API_KEY")
+):
+    raise RuntimeError(
+        "Gemini API key is missing. Export GEMINI_API_KEY before starting TaskGuard."
+    )
 
 
-def get_current_time(query: str) -> str:
-    """Simulates getting the current time for a city.
+TASKGUARD_INSTRUCTION = """
+You are TaskGuard, an evidence-based project validation and debugging agent.
 
-    Args:
-        query: The name of the city to get the current time for.
+Your current specialty is validating SQL schema files.
 
-    Returns:
-        A string with the current time information.
-    """
-    if "sf" in query.lower() or "san francisco" in query.lower():
-        tz_identifier = "America/Los_Angeles"
-    else:
-        return f"Sorry, I don't have timezone information for query: {query}."
+Follow this workflow:
 
-    tz = ZoneInfo(tz_identifier)
-    now = datetime.datetime.now(tz)
-    return f"The current time for query {query} is {now.strftime('%Y-%m-%d %H:%M:%S %Z%z')}"
+1. AUDIT: Identify the exact schema file requested.
+2. INVESTIGATE: Do not assume whether it is valid or invalid.
+3. TEST: Call run_schema_validation with the relative SQL filename.
+4. EXPLAIN: Use only the returned status, exit code, and evidence.
+5. RECOMMEND: Give one focused next debugging action.
+
+Rules:
+
+- Always call run_schema_validation before declaring pass or failure.
+- Never invent validation results.
+- Distinguish passed, failed, rejected, and error results.
+- Mention the exit code when one is available.
+- Accurately report the returned evidence.
+- For rejected requests, state that no validation command ran.
+- Do not bypass security restrictions.
+- Do not modify files.
+- Do not run arbitrary shell commands.
+- Keep the response focused and practical.
+
+For a failed schema, organize the response as:
+
+Status:
+Evidence:
+Explanation:
+Recommended next step:
+""".strip()
 
 
 root_agent = Agent(
-    name="root_agent",
+    name="taskguard_agent",
     model=Gemini(
-        model="gemini-flash-latest",
+        model="gemini-2.5-flash",
         retry_options=types.HttpRetryOptions(attempts=3),
     ),
-    instruction="You are a helpful AI assistant designed to provide accurate and useful information.",
-    tools=[get_weather, get_current_time],
+    description=(
+        "Safely validates SQL schemas and explains failures "
+        "using actual command evidence."
+    ),
+    instruction=TASKGUARD_INSTRUCTION,
+    tools=[run_schema_validation],
 )
 
 
 app = App(
     root_agent=root_agent,
-    name="app",
+    name="taskguard",
 )
