@@ -45,3 +45,9 @@ deployment_metadata.json
 *.log
 *.tmp
 *.swp
+
+# ADK local runtime state
+.adk/
+
+# Local backup copies
+*.save
