@@ -1,0 +1,47 @@
+# Python caches
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Environment variables and secrets
+.env
+.env.*
+!.env.example
+credentials.json
+service-account*.json
+*service_account*.json
+*.pem
+*.key
+
+# Google Cloud local credentials
+.application_default_credentials.json
+
+# IDE and macOS files
+.vscode/
+.idea/
+.DS_Store
+
+# Test and coverage output
+.coverage
+htmlcov/
+coverage.xml
+
+# Build output
+build/
+dist/
+*.egg-info/
+
+# Generated deployment information
+deployment_metadata.json
+
+# Temporary files
+*.log
+*.tmp
+*.swp
