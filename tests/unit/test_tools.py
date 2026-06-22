@@ -45,3 +45,35 @@ def test_directory_traversal_is_rejected():
     assert result["command_run"] == ""
     assert result["evidence"] == ["Directory traversal is not allowed."]
     assert result["file_modified"] is False
+
+
+def test_absolute_path_is_rejected():
+    result = tools.run_schema_validation("/etc/passwd")
+
+    assert result["status"] == "rejected"
+    assert result["exit_code"] is None
+    assert result["command_run"] == ""
+    assert result["evidence"] == ["Absolute paths are not allowed."]
+    assert result["file_modified"] is False
+
+
+def test_non_sql_file_is_rejected():
+    result = tools.run_schema_validation("bad_schema.txt")
+
+    assert result["status"] == "rejected"
+    assert result["exit_code"] is None
+    assert result["command_run"] == ""
+    assert result["evidence"] == ["Only .sql files can be validated."]
+    assert result["file_modified"] is False
+
+
+def test_missing_sql_file_is_rejected():
+    result = tools.run_schema_validation("nonexistent.sql")
+
+    assert result["status"] == "rejected"
+    assert result["exit_code"] is None
+    assert result["command_run"] == ""
+    assert result["evidence"] == [
+        "The requested SQL file does not exist."
+    ]
+    assert result["file_modified"] is False

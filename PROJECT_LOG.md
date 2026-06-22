@@ -425,3 +425,82 @@ Then open TaskGuard in Antigravity and perform a bounded audit that:
 3. checks security controls
 4. produces an evidence-based gap report
 5. does not modify files without approval
+
+---
+
+## 2026-06-22 — Antigravity security audit
+
+Antigravity used the `taskguard-audit` Agent Skill to inspect the repository.
+
+### Audit command
+
+```bash
+uv run pytest tests/unit/test_tools.py -v
+```
+
+### Initial audit result
+
+- All three existing tests passed.
+- Git reported a clean working tree.
+- No files were modified by Antigravity.
+- The existing security implementation was confirmed.
+- Antigravity identified three missing test cases:
+  - absolute-path rejection
+  - non-SQL-file rejection
+  - missing-SQL-file rejection
+
+### Confirmed implementation findings
+
+Antigravity confirmed that TaskGuard:
+
+- rejects absolute paths
+- rejects directory traversal such as `../`
+- accepts only `.sql` files
+- uses `subprocess.run` without shell execution
+- captures validation output and exit codes
+- reports `file_modified` as false
+- reads schema files without modifying them
+
+### Action taken
+
+Three focused unit tests were added to:
+
+```text
+tests/unit/test_tools.py
+```
+
+No change was made to the working implementation in:
+
+```text
+app/tools.py
+```
+
+### Final verification command
+
+```bash
+uv run pytest tests/unit/test_tools.py -v
+```
+
+### Final verification result
+
+```text
+6 passed in 0.09s
+```
+
+The test suite now covers:
+
+1. valid schema acceptance
+2. invalid schema evidence
+3. directory-traversal rejection
+4. absolute-path rejection
+5. non-SQL-file rejection
+6. nonexistent-SQL-file rejection
+
+### Files modified
+
+- `tests/unit/test_tools.py`
+- `PROJECT_LOG.md`
+
+### Audit conclusion
+
+The Antigravity audit identified test-coverage gaps rather than implementation failures. The gaps were resolved by adding focused tests, and all six tests passed.
