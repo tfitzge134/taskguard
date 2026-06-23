@@ -13,8 +13,17 @@
 # limitations under the License.
 
 import logging
+import os
 
 import pytest
+
+if os.getenv("RUN_VERTEX_RUNTIME_TESTS") != "TRUE":
+    pytest.skip(
+        "Vertex AI Agent Engine runtime tests require a billing-enabled "
+        "Google Cloud project and are optional for the local TaskGuard MVP.",
+        allow_module_level=True,
+    )
+
 from google.adk.events.event import Event
 
 from app.agent_runtime_app import AgentEngineApp
