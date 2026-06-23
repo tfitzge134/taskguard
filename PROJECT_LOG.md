@@ -504,3 +504,123 @@ The test suite now covers:
 ### Audit conclusion
 
 The Antigravity audit identified test-coverage gaps rather than implementation failures. The gaps were resolved by adding focused tests, and all six tests passed.
+
+---
+
+## 2026-06-23 — Integration and full-suite verification
+
+### TaskGuard end-to-end integration test
+
+Updated:
+
+```text
+tests/integration/test_agent.py
+```
+
+The integration test uses the Google ADK Runner and verifies that TaskGuard:
+
+- receives a request to validate `bad_schema.sql`
+- calls `run_schema_validation`
+- reports the validation status as failed
+- reports exit code `1`
+- explains the forbidden `DROP TABLE`
+- identifies `userProfile` as not snake_case
+- identifies the missing `id` primary key in `posts`
+- bases its response on actual tool evidence
+
+Verification result:
+
+```text
+1 passed, 7 warnings in 3.96s
+```
+
+Git checkpoint:
+
+```text
+5a0710c Add TaskGuard end-to-end integration test
+```
+
+### Optional Vertex AI runtime tests
+
+The starter repository includes:
+
+```text
+app/agent_runtime_app.py
+tests/integration/test_agent_runtime_app.py
+```
+
+These files support optional Vertex AI Agent Engine deployment.
+
+The runtime requires:
+
+- a configured Google Cloud project
+- Vertex AI authentication
+- Cloud Logging
+- a billing-enabled project
+
+TaskGuard currently uses Google AI Studio locally with:
+
+```text
+GEMINI_API_KEY
+GOOGLE_GENAI_USE_VERTEXAI=FALSE
+```
+
+The Vertex runtime tests are skipped unless this variable is explicitly enabled:
+
+```text
+RUN_VERTEX_RUNTIME_TESTS=TRUE
+```
+
+This keeps optional cloud deployment separate from the local TaskGuard MVP.
+
+Git checkpoint:
+
+```text
+6886edb Skip optional Vertex runtime tests without cloud project
+```
+
+### Complete test-suite verification
+
+Command:
+
+```bash
+uv run pytest \
+  tests/unit/test_tools.py \
+  tests/integration/test_agent.py \
+  tests/integration/test_agent_runtime_app.py \
+  -v
+```
+
+Result:
+
+```text
+7 passed, 1 skipped, 7 warnings in 4.15s
+```
+
+The seven passing tests consist of:
+
+- six deterministic validation and security unit tests
+- one complete Google ADK and Gemini integration test
+
+The skipped module contains the optional Vertex AI Agent Engine runtime tests.
+
+The warnings originate from Google ADK and Google GenAI dependency features and deprecations. They did not cause test failures.
+
+### Current verified status
+
+Confirmed working:
+
+- safe deterministic schema-validation tool
+- valid-schema workflow
+- invalid-schema workflow
+- directory-traversal rejection
+- absolute-path rejection
+- non-SQL-file rejection
+- missing-file rejection
+- complete ADK tool invocation
+- evidence-based failure explanation
+- Google AI Studio authentication
+- bounded Agent Skill audit
+- seven passing automated tests
+- optional cloud runtime isolated from the local MVP
+- clean GitHub checkpoints
