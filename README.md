@@ -240,7 +240,7 @@ uv run pytest -v
 Latest verified default result:
 
 ```text
-8 passed, 7 skipped, 4 warnings in 1.37s
+8 passed, 3 skipped, 4 warnings in 1.16s
 ```
 
 The default suite runs deterministic validation tests and the evaluation-dataset structure test. Tests that make real Gemini requests are skipped by default so normal development does not unexpectedly consume API quota.
@@ -248,7 +248,7 @@ The default suite runs deterministic validation tests and the evaluation-dataset
 Run the live TaskGuard integration and evaluation tests explicitly:
 
 ```bash
-RUN_LIVE_GEMINI_TESTS=TRUE uv run pytest   tests/integration/test_agent.py   tests/integration/test_taskguard_local_eval.py   -v -s
+RUN_LIVE_GEMINI_TESTS=TRUE uv run pytest tests/integration/test_agent.py tests/integration/test_taskguard_local_eval.py -v -s
 ```
 
 A Gemini API key must also be available through `GEMINI_API_KEY` or `GOOGLE_API_KEY`.

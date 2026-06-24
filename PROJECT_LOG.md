@@ -709,3 +709,69 @@ The remaining warnings came from Google ADK and Google GenAI dependency features
 ### Git checkpoint
 
 bbbefba Add TaskGuard local evaluation suite
+
+---
+
+## 2026-06-24 — Specification recovery and quota-safe evaluation
+
+### As-built specification
+
+Created the authoritative TaskGuard specification:
+
+`SPEC.md`
+
+The specification records:
+
+* the TaskGuard business purpose and intended users
+* the evidence-based agent workflow
+* the deterministic validation-tool contract
+* security boundaries and explicit non-goals
+* automated evaluation scenarios
+* the three official submission demonstrations
+* the bounded Antigravity audit role
+* submission acceptance criteria
+* the anti-drift change-control rule
+
+Git checkpoint:
+
+`d92f463 Add TaskGuard as-built specification`
+
+### Quota-safe evaluation-dataset test
+
+The evaluation-dataset structure test previously lived inside the live Gemini
+evaluation module. Because that module skipped at import time when no Gemini
+API key was available, the deterministic dataset test was also skipped.
+
+Moved the dataset-structure assertion into:
+
+`tests/unit/test_eval_dataset.py`
+
+The five live TaskGuard evaluation cases remain in:
+
+`tests/integration/test_taskguard_local_eval.py`
+
+They continue to require:
+
+* `GEMINI_API_KEY` or `GOOGLE_API_KEY`
+* `RUN_LIVE_GEMINI_TESTS=TRUE`
+
+### No-key verification
+
+Command:
+
+`env -u GEMINI_API_KEY -u GOOGLE_API_KEY uv run pytest -v`
+
+Verified result:
+
+`8 passed, 3 skipped, 4 warnings in 1.16s`
+
+This confirms that:
+
+* deterministic validation tests run without Gemini credentials
+* the evaluation-dataset structure test runs without Gemini credentials
+* no live Gemini request is made by the default no-key suite
+* live integration and evaluation modules remain skipped
+
+Git checkpoint:
+
+`17a6269 Make evaluation dataset test quota safe`

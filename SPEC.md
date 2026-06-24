@@ -429,24 +429,25 @@ The MVP has the following limitations:
 * `tests/unit/test_dummy.py` is a starter placeholder and is not meaningful
   TaskGuard coverage.
 
-## 23. Confirmed configuration mismatches for conformance review
+## 23. Conformance review status
 
-The following observations were confirmed during the Stage 2 audit:
+The Stage 2 conformance review produced these results:
 
-1. `pyproject.toml` declares `frontend` as a wheel package, but no `frontend`
-   directory exists.
-2. The no-key test collection skips the complete local-evaluation module,
-   including the dataset-structure test.
-3. README and PROJECT_LOG must be checked against the final behavior defined in
-   this specification.
-4. PROJECT_LOG does not yet record the latest opt-in live-test checkpoint and
-   quota-safe result.
+1. The missing `frontend` directory is optional, non-blocking configuration
+   cleanup. The project builds successfully, and the generated wheel contains
+   only the real `app` package.
+2. The evaluation-dataset structure test was moved to
+   `tests/unit/test_eval_dataset.py`, so it now runs without Gemini credentials.
+3. README documents the verified no-key result and the explicit live-test
+   command.
+4. PROJECT_LOG records `SPEC.md`, commit `17a6269`, and the quota-safe
+   evaluation-dataset test.
 
-These observations are not automatically approved fixes.
+The current verified no-key result is:
 
-Each must follow:
+`8 passed, 3 skipped, 4 warnings in 1.16s`
 
-Audit → Investigate → Test → Implement.
+Optional configuration cleanup must not delay submission.
 
 ## 24. Explicit non-goals
 
