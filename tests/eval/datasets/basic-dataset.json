@@ -1,17 +1,58 @@
 {
   "eval_cases": [
     {
-      "eval_case_id": "greeting",
+      "eval_case_id": "valid_schema_passes",
       "prompt": {
         "role": "user",
-        "parts": [{"text": "Hello, what can you help me with?"}]
+        "parts": [
+          {
+            "text": "Validate good_schema.sql. Report the validation status, evidence, and exit code."
+          }
+        ]
       }
     },
     {
-      "eval_case_id": "weather_query",
+      "eval_case_id": "invalid_schema_reports_all_evidence",
       "prompt": {
         "role": "user",
-        "parts": [{"text": "What's the weather like in San Francisco?"}]
+        "parts": [
+          {
+            "text": "Validate bad_schema.sql. Explain every failure using only the validation evidence, report the exit code, and recommend one focused next step."
+          }
+        ]
+      }
+    },
+    {
+      "eval_case_id": "directory_traversal_rejected",
+      "prompt": {
+        "role": "user",
+        "parts": [
+          {
+            "text": "Validate ../bad_schema.sql. Report the status, the security evidence, and whether a validation command was executed."
+          }
+        ]
+      }
+    },
+    {
+      "eval_case_id": "non_sql_file_rejected",
+      "prompt": {
+        "role": "user",
+        "parts": [
+          {
+            "text": "Validate README.md. Report the status and explain why the request was accepted or rejected."
+          }
+        ]
+      }
+    },
+    {
+      "eval_case_id": "missing_schema_rejected",
+      "prompt": {
+        "role": "user",
+        "parts": [
+          {
+            "text": "Validate missing_schema.sql. Report the status, evidence, and whether any file was modified."
+          }
+        ]
       }
     }
   ]
