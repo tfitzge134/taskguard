@@ -1,9 +1,9 @@
 [project]
-name = "my-agent"
+name = "taskguard"
 version = "0.1.0"
-description = ""
+description = "Evidence-based Google ADK agent for safe SQL schema validation"
 authors = [
-    {name = "Your Name", email = "your@email.com"},
+    {name = "Teresa Fitzgerald"},
 ]
 
 
