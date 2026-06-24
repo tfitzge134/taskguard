@@ -231,33 +231,44 @@ Run the TaskGuard ADK integration test:
 uv run pytest tests/integration/test_agent.py -v
 ```
 
-Run the verified local test set:
+Run the five-case local TaskGuard evaluation:
+
+```bash
+uv run pytest tests/integration/test_taskguard_local_eval.py -v -s
+```
+
+This evaluation loads prompts from `tests/eval/datasets/basic-dataset.json` and verifies:
+
+* valid-schema acceptance
+* complete invalid-schema evidence
+* directory-traversal rejection
+* non-SQL-file rejection
+* missing-file rejection
+
+The live cases are paced to remain within the Google AI Studio free-tier request limit.
+
+Latest verified evaluation result:
+
+```text
+6 passed, 11 warnings in 128.82s
+```
+
+Run the complete local test set:
 
 ```bash
 uv run pytest \
   tests/unit/test_tools.py \
   tests/integration/test_agent.py \
   tests/integration/test_agent_runtime_app.py \
-  -v
+  tests/integration/test_taskguard_local_eval.py \
+  -v -s
 ```
 
-Latest verified result:
+The complete suite covers deterministic tool behavior, ADK tool invocation, evidence-based responses, evaluation-dataset structure, and five live TaskGuard scenarios.
 
-```text
-7 passed, 1 skipped, 7 warnings in 4.15s
-```
+The optional Vertex runtime test is skipped unless `RUN_VERTEX_RUNTIME_TESTS=TRUE` and a billing-enabled Google Cloud project is available.
 
-The passing tests include:
-
-- valid-schema acceptance
-- invalid-schema evidence
-- directory-traversal rejection
-- absolute-path rejection
-- non-SQL-file rejection
-- missing-file rejection
-- complete ADK tool invocation and evidence-based response
-
-The warnings come from experimental or deprecated features inside Google ADK and Google GenAI dependencies. They do not represent failed TaskGuard tests.
+Warnings from experimental or deprecated Google ADK and Google GenAI dependency features do not represent failed TaskGuard tests.
 
 ## Optional Vertex AI Runtime
 
