@@ -624,3 +624,88 @@ Confirmed working:
 - seven passing automated tests
 - optional cloud runtime isolated from the local MVP
 - clean GitHub checkpoints
+
+
+---
+
+## 2026-06-24 — Local TaskGuard evaluation
+
+### Evaluation dataset
+
+Replaced the original greeting and weather evaluation cases with five TaskGuard scenarios:
+
+1. valid schema acceptance
+2. invalid schema evidence
+3. directory-traversal rejection
+4. non-SQL-file rejection
+5. missing-schema rejection
+
+Dataset:
+
+tests/eval/datasets/basic-dataset.json
+
+### TaskGuard-specific rubric
+
+Updated:
+
+tests/eval/eval_config.yaml
+
+The rubric evaluates:
+
+- required use of run_schema_validation
+- evidence grounded in the tool trace
+- correct passed, failed, rejected, or error status
+- exit-code reporting
+- complete invalid-schema findings
+- safe handling of rejected requests
+- absence of unsupported file-modification claims
+- one focused remediation step when needed
+
+### Cloud evaluator investigation
+
+agents-cli versions 0.5.0 and 0.5.1 were inspected.
+
+The eval generate command unconditionally requires a Google Cloud project and runs inference through vertexai.Client and the Vertex AI evaluation service.
+
+Because the TaskGuard MVP uses Google AI Studio and no billing-enabled Google Cloud project, the cloud evaluator was not used. A random project ID was not supplied merely to bypass project detection.
+
+### Local ADK evaluation
+
+Created:
+
+tests/integration/test_taskguard_local_eval.py
+
+The evaluation uses the same Google ADK Runner as the verified integration test and loads prompts directly from the TaskGuard evaluation dataset.
+
+The test suite includes:
+
+- one dataset-structure test
+- five live TaskGuard evaluation cases
+
+### Free-tier rate-limit investigation
+
+The first evaluation run completed all assertions but produced a background 429 quota warning. The Google AI Studio free tier reported a limit of five gemini-2.5-flash requests per minute.
+
+A 30-second interval was added between live evaluation cases, and unhandled thread exceptions were configured as test errors.
+
+### Clean verification result
+
+Command:
+
+uv run pytest tests/integration/test_taskguard_local_eval.py -v -s
+
+Result:
+
+6 passed, 11 warnings in 128.82s
+
+The clean run contained no:
+
+- 429 Too Many Requests
+- ResourceExhausted error
+- PytestUnhandledThreadExceptionWarning
+
+The remaining warnings came from Google ADK and Google GenAI dependency features and deprecations.
+
+### Git checkpoint
+
+bbbefba Add TaskGuard local evaluation suite
