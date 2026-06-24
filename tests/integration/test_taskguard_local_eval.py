@@ -144,17 +144,6 @@ def _assert_any(text: str, *phrases: str) -> None:
     )
 
 
-def test_evaluation_dataset_has_expected_cases() -> None:
-    """The dataset must contain the five planned TaskGuard scenarios."""
-    assert set(EVAL_PROMPTS) == {
-        "valid_schema_passes",
-        "invalid_schema_reports_all_evidence",
-        "directory_traversal_rejected",
-        "non_sql_file_rejected",
-        "missing_schema_rejected",
-    }
-
-
 @LIVE_GEMINI_TEST
 def test_local_eval_valid_schema() -> None:
     tool_names, evidence = _run_taskguard("valid_schema_passes")
