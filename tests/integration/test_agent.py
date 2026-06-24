@@ -24,6 +24,19 @@ if not (
 
 from app.agent import root_agent
 
+HAS_GEMINI_API_KEY = bool(
+os.getenv("GEMINI_API_KEY") or os.getenv("GOOGLE_API_KEY")
+)
+RUN_LIVE_GEMINI_TESTS = os.getenv("RUN_LIVE_GEMINI_TESTS") == "TRUE"
+
+pytestmark = pytest.mark.skipif(
+not (HAS_GEMINI_API_KEY and RUN_LIVE_GEMINI_TESTS),
+reason=(
+"Set RUN_LIVE_GEMINI_TESTS=TRUE and provide GEMINI_API_KEY "
+"or GOOGLE_API_KEY to run live Gemini tests."
+),
+)
+
 
 def test_taskguard_validates_bad_schema() -> None:
     """TaskGuard must call its tool and report actual validation evidence."""

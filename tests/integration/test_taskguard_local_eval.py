@@ -37,6 +37,22 @@ pytestmark = pytest.mark.filterwarnings(
 )
 
 
+HAS_GEMINI_API_KEY = bool(
+os.getenv("GEMINI_API_KEY") or os.getenv("GOOGLE_API_KEY")
+)
+
+LIVE_GEMINI_TEST = pytest.mark.skipif(
+not (
+HAS_GEMINI_API_KEY
+and os.getenv("RUN_LIVE_GEMINI_TESTS") == "TRUE"
+),
+reason=(
+"Set RUN_LIVE_GEMINI_TESTS=TRUE and provide "
+"GEMINI_API_KEY or GOOGLE_API_KEY."
+),
+)
+
+
 def _load_prompts() -> dict[str, str]:
     """Load prompts from the TaskGuard evaluation dataset."""
     data = json.loads(DATASET_PATH.read_text())
@@ -139,6 +155,7 @@ def test_evaluation_dataset_has_expected_cases() -> None:
     }
 
 
+@LIVE_GEMINI_TEST
 def test_local_eval_valid_schema() -> None:
     tool_names, evidence = _run_taskguard("valid_schema_passes")
 
@@ -153,6 +170,7 @@ def test_local_eval_valid_schema() -> None:
     )
 
 
+@LIVE_GEMINI_TEST
 def test_local_eval_invalid_schema() -> None:
     tool_names, evidence = _run_taskguard(
         "invalid_schema_reports_all_evidence"
@@ -173,6 +191,7 @@ def test_local_eval_invalid_schema() -> None:
     assert "primary key" in evidence
 
 
+@LIVE_GEMINI_TEST
 def test_local_eval_directory_traversal() -> None:
     tool_names, evidence = _run_taskguard(
         "directory_traversal_rejected"
@@ -190,6 +209,7 @@ def test_local_eval_directory_traversal() -> None:
     )
 
 
+@LIVE_GEMINI_TEST
 def test_local_eval_non_sql_file() -> None:
     tool_names, evidence = _run_taskguard("non_sql_file_rejected")
 
@@ -203,6 +223,7 @@ def test_local_eval_non_sql_file() -> None:
     )
 
 
+@LIVE_GEMINI_TEST
 def test_local_eval_missing_schema() -> None:
     tool_names, evidence = _run_taskguard("missing_schema_rejected")
 
