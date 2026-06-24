@@ -1,89 +1,323 @@
-# my-agent
+# TaskGuard
 
-Simple ReAct agent
-Agent generated with `agents-cli` version `0.5.0`
+TaskGuard is an evidence-based Google ADK agent that safely validates SQL schema files, reports actual validator evidence, and recommends a focused next action.
+
+It was created for the **Agents for Business** track of the Five-Day AI Agents Capstone.
+
+## Problem
+
+Software teams often ask AI assistants to diagnose validation failures. A general-purpose assistant may guess, invent a cause, execute an unsafe command, or change files before the problem has been verified.
+
+TaskGuard follows a stricter workflow:
+
+> Audit → Investigate → Test → Implement
+
+It treats an inference as a hypothesis, not proof. Conclusions must be grounded in inspected code, command output, validator results, or automated tests.
+
+## What TaskGuard Does
+
+TaskGuard:
+
+1. Receives a request to validate a SQL schema.
+2. Calls the approved `run_schema_validation` tool.
+3. Applies path and file-type security controls.
+4. Runs the deterministic schema validator.
+5. Captures output and the process exit code.
+6. Distinguishes `passed`, `failed`, `rejected`, and `error` results.
+7. Explains failures using the returned evidence.
+8. Recommends one focused next action.
+9. Does not modify the schema file.
+
+## Example
+
+Request:
+
+```text
+Validate bad_schema.sql. Explain every failure using only the validation
+evidence and recommend one next step.
+```
+
+Verified result:
+
+```text
+Status: failed
+Exit code: 1
+
+Evidence:
+- DROP TABLE statements are forbidden.
+- Table userProfile must be snake_case.
+- Table posts is missing a primary key named id.
+```
+
+## Architecture
+
+```mermaid
+flowchart LR
+    U[User request] --> A[TaskGuard Google ADK agent]
+    A --> T[run_schema_validation]
+    T --> S[Security checks]
+    S --> V[validate_schema.py]
+    V --> E[Status, evidence, and exit code]
+    E --> A
+    A --> R[Evidence-based response]
+```
+
+## Security Controls
+
+The validation tool:
+
+- accepts only relative `.sql` paths
+- rejects absolute paths
+- rejects directory traversal such as `../`
+- rejects non-SQL files
+- rejects missing files
+- invokes only the approved validator
+- uses argument-list subprocess execution rather than shell execution
+- applies a timeout
+- captures standard output, standard error, and exit code
+- does not execute arbitrary user-provided commands
+- does not modify the validated file
+
+Example rejected request:
+
+```text
+Validate ../bad_schema.sql
+```
+
+Result:
+
+```text
+Status: rejected
+Evidence: Directory traversal is not allowed.
+No validation command was executed.
+```
 
 ## Project Structure
 
-```
-my-agent/
-├── app/         # Core agent code
-│   ├── agent.py               # Main agent logic
-│   ├── agent_runtime_app.py    # Agent Runtime application logic
-│   └── app_utils/             # App utilities and helpers
-├── tests/                     # Unit, integration, and load tests
-├── GEMINI.md                  # AI-assisted development guide
-└── pyproject.toml             # Project dependencies
+```text
+taskguard/
+├── .agents/
+│   └── skills/
+│       └── taskguard-audit/
+│           └── SKILL.md
+├── app/
+│   ├── agent.py
+│   ├── agent_runtime_app.py
+│   ├── tools.py
+│   └── app_utils/
+├── tests/
+│   ├── integration/
+│   │   ├── test_agent.py
+│   │   └── test_agent_runtime_app.py
+│   └── unit/
+│       └── test_tools.py
+├── bad_schema.sql
+├── good_schema.sql
+├── validate_schema.py
+├── PROJECT_LOG.md
+├── pyproject.toml
+└── README.md
 ```
 
-> 💡 **Tip:** Use [Gemini CLI](https://github.com/google-gemini/gemini-cli) for AI-assisted development - project context is pre-configured in `GEMINI.md`.
+## Core Files
+
+### `app/agent.py`
+
+Defines the TaskGuard Google ADK agent, its instructions, Gemini model, and approved validation tool.
+
+### `app/tools.py`
+
+Implements `run_schema_validation`, including security checks and structured results.
+
+### `validate_schema.py`
+
+Applies the deterministic schema policies:
+
+- table names must use snake_case
+- every table must have a primary key named `id`
+- `DROP TABLE` statements are forbidden
+
+### `.agents/skills/taskguard-audit/SKILL.md`
+
+Defines a bounded Antigravity audit procedure that inspects implementation and tests without modifying project files.
+
+### `PROJECT_LOG.md`
+
+Records decisions, command evidence, test results, security findings, and Git checkpoints.
 
 ## Requirements
 
-Before you begin, ensure you have:
-- **uv**: Python package manager (used for all dependency management in this project) - [Install](https://docs.astral.sh/uv/getting-started/installation/) ([add packages](https://docs.astral.sh/uv/concepts/dependencies/) with `uv add <package>`)
-- **agents-cli**: Agents CLI - Install with `uv tool install google-agents-cli`
-- **Google Cloud SDK**: For GCP services - [Install](https://cloud.google.com/sdk/docs/install)
+- Python 3.11 through 3.13
+- `uv`
+- a Google AI Studio Gemini API key
 
+Google Cloud billing is not required for the local TaskGuard MVP.
 
-## Quick Start
+## Local Setup
 
-Install `agents-cli` and its skills if not already installed:
-
-```bash
-uvx google-agents-cli setup
-```
-
-Install required packages:
+Clone the repository:
 
 ```bash
-agents-cli install
+git clone https://github.com/tfitzge134/taskguard.git
+cd taskguard
 ```
 
-Test the agent with a local web server:
+Install the locked dependencies:
+
+```bash
+uv sync
+```
+
+Export the Gemini credentials without storing the key in source code:
+
+```bash
+read -s -p "Paste Gemini API key: " GEMINI_API_KEY
+echo
+export GEMINI_API_KEY
+export GOOGLE_GENAI_USE_VERTEXAI=FALSE
+```
+
+Confirm that the key reaches the project environment without printing it:
+
+```bash
+uv run python - <<'PY'
+import os
+
+print(
+    "Gemini API key:",
+    "available" if os.getenv("GEMINI_API_KEY") else "missing",
+)
+print(
+    "Vertex AI mode:",
+    os.getenv("GOOGLE_GENAI_USE_VERTEXAI"),
+)
+PY
+```
+
+## Run TaskGuard Locally
+
+Launch the local agent playground:
 
 ```bash
 agents-cli playground
 ```
 
-You can also use features from the [ADK](https://adk.dev/) CLI with `uv run adk`.
+Example requests:
 
-## Commands
-
-| Command              | Description                                                                                 |
-| -------------------- | ------------------------------------------------------------------------------------------- |
-| `agents-cli install` | Install dependencies using uv                                                         |
-| `agents-cli playground` | Launch local development environment                                                  |
-| `agents-cli lint`    | Run code quality checks                                                               |
-| `agents-cli eval`    | Evaluate agent behavior (generate, grade, analyze, and more — see `agents-cli eval --help`) |
-| `uv run pytest tests/unit tests/integration` | Run unit and integration tests                                                        |
-| `agents-cli deploy`  | Deploy agent to Agent Runtime                                                                |
-| `agents-cli publish gemini-enterprise` | Register deployed agent to Gemini Enterprise                    |
-
-## 🛠️ Project Management
-
-| Command | What It Does |
-|---------|--------------|
-| `agents-cli scaffold enhance` | Add CI/CD pipelines and Terraform infrastructure |
-| `agents-cli infra cicd` | One-command setup of entire CI/CD pipeline + infrastructure |
-| `agents-cli scaffold upgrade` | Auto-upgrade to latest version while preserving customizations |
-
----
-
-## Development
-
-Edit your agent logic in `app/agent.py` and test with `agents-cli playground` - it auto-reloads on save.
-
-## Deployment
-
-```bash
-gcloud config set project <your-project-id>
-agents-cli deploy
+```text
+Validate good_schema.sql and report the evidence and exit code.
 ```
 
-To add CI/CD and Terraform, run `agents-cli scaffold enhance`.
-To set up your production infrastructure, run `agents-cli infra cicd`.
+```text
+Validate bad_schema.sql. Explain every failure using only the validation
+evidence and recommend one next step.
+```
 
-## Observability
+```text
+Validate ../bad_schema.sql and explain whether any command was executed.
+```
 
-Built-in telemetry exports to Cloud Trace, BigQuery, and Cloud Logging.
+## Testing
+
+Run the deterministic unit tests:
+
+```bash
+uv run pytest tests/unit/test_tools.py -v
+```
+
+Run the TaskGuard ADK integration test:
+
+```bash
+uv run pytest tests/integration/test_agent.py -v
+```
+
+Run the verified local test set:
+
+```bash
+uv run pytest \
+  tests/unit/test_tools.py \
+  tests/integration/test_agent.py \
+  tests/integration/test_agent_runtime_app.py \
+  -v
+```
+
+Latest verified result:
+
+```text
+7 passed, 1 skipped, 7 warnings in 4.15s
+```
+
+The passing tests include:
+
+- valid-schema acceptance
+- invalid-schema evidence
+- directory-traversal rejection
+- absolute-path rejection
+- non-SQL-file rejection
+- missing-file rejection
+- complete ADK tool invocation and evidence-based response
+
+The warnings come from experimental or deprecated features inside Google ADK and Google GenAI dependencies. They do not represent failed TaskGuard tests.
+
+## Optional Vertex AI Runtime
+
+The original starter includes a Vertex AI Agent Engine runtime wrapper:
+
+```text
+app/agent_runtime_app.py
+```
+
+Its tests require a configured, billing-enabled Google Cloud project with Vertex AI and Cloud Logging access. They are intentionally excluded from the default local MVP.
+
+To opt into those tests after configuring the required cloud environment:
+
+```bash
+export RUN_VERTEX_RUNTIME_TESTS=TRUE
+uv run pytest tests/integration/test_agent_runtime_app.py -v
+```
+
+Skipping this optional deployment test does not skip the TaskGuard ADK integration test.
+
+## Agent Skill Audit
+
+TaskGuard includes an Agent Skill for a bounded security and test-coverage audit.
+
+The audit verified the implementation and identified three missing security tests. Those gaps were addressed without changing the working validation tool.
+
+Final deterministic audit result:
+
+```text
+6 passed in 0.09s
+```
+
+## Current Scope
+
+The current version intentionally does not include:
+
+- unrestricted shell execution
+- automatic file modification
+- a frontend
+- a database
+- RAG
+- a large multi-agent architecture
+- mandatory cloud deployment
+
+This keeps the capstone small, testable, secure, and reproducible.
+
+## Verified Status
+
+- Google ADK agent implemented
+- deterministic custom tool implemented
+- Google AI Studio authentication verified
+- safe schema validation verified
+- security rejection paths tested
+- Agent Skill created and used
+- Antigravity audit completed
+- end-to-end ADK integration test passing
+- seven tests passing
+- optional cloud runtime isolated
+- public GitHub repository maintained
+
+## Repository
+
+https://github.com/tfitzge134/taskguard
