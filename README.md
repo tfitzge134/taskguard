@@ -304,6 +304,19 @@ Final deterministic audit result:
 6 passed in 0.09s
 ```
 
+Antigravity is not part of the TaskGuard runtime. It is used later as a
+bounded, read-only external auditor to review the repository against the
+specification, tests, documentation, and security claims. Any Antigravity
+finding must be independently inspected, reproduced, and tested before a fix
+is accepted.
+
+Official demonstration cases for the final submission:
+
+- valid schema passes
+- invalid schema reports complete evidence
+- directory traversal is rejected without running validation
+
+
 ## Current Scope
 
 The current version intentionally does not include:
@@ -328,7 +341,7 @@ This keeps the capstone small, testable, secure, and reproducible.
 - Agent Skill created and used
 - Antigravity audit completed
 - end-to-end ADK integration test passing
-- seven tests passing
+- quota-safe default suite verified: 8 passed, 3 skipped, 4 warnings
 - optional cloud runtime isolated
 - public GitHub repository maintained
 
