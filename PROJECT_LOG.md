@@ -775,3 +775,34 @@ This confirms that:
 Git checkpoint:
 
 `17a6269 Make evaluation dataset test quota safe`
+## Final Live Gemini Validation
+
+Command executed:
+
+```bash
+RUN_LIVE_GEMINI_TESTS=TRUE uv run pytest \
+  tests/integration/test_agent.py \
+  tests/integration/test_taskguard_local_eval.py \
+  -v -s
+```
+
+Result:
+
+* 6 tests collected
+* 6 tests passed
+* 0 failures
+* 12 non-blocking dependency/framework warnings
+* Runtime: 126.01 seconds
+
+Verified scenarios:
+
+1. Invalid schema validation through the TaskGuard agent
+2. Valid schema evaluation
+3. Invalid schema evaluation with validator evidence
+4. Directory traversal rejection
+5. Non-SQL file rejection
+6. Missing schema handling
+
+Conclusion:
+
+TaskGuard completed live end-to-end validation using Gemini. The agent's core validation behavior, evidence-grounded responses, and refusal boundaries were verified successfully.
