@@ -1,3 +1,11 @@
+# Antigravity Dry-Run Prompt
+
+This prompt was used to test whether Antigravity could perform a bounded, read-only repository audit without overreaching, inventing unsupported claims, or acting like the implementation driver.
+
+It is a prompt-control test, not the final audit prompt.
+
+---
+
 You are Antigravity performing a bounded, read-only dry-run audit for the TaskGuard repository.
 
 Repository context:
