@@ -1,112 +1,156 @@
+You are Antigravity performing the final bounded, read-only audit of the completed TaskGuard repository.
 
-Tests executed
-uv run pytest (from /Users/teresafitzgerald/agy2-projects/my-agent)
-uv run pytest tests/unit/test_tools.py -v
-uv run pytest tests/unit/test_eval_dataset.py -v
-git status
-git log -n 5
-git check-ignore app/agent.py.save
-git check-ignore app/.adk
-Evidence
-Pytest command result: 8 passed, 3 skipped, 4 warnings in 1.23s (with uv run pytest).
-Tool unit test result: 6 passed in 0.09s (with uv run pytest tests/unit/test_tools.py -v).
-Dataset unit test result: 1 passed in 0.01s (with uv run pytest tests/unit/test_eval_dataset.py -v).
-Clean workspace state: git status returned:
-text
+Repository context:
 
+* Project: TaskGuard
+* Track: Agents for Business
+* Final verified checkpoint: `fef24c3`
+* Core purpose: a safe, evidence-based Google ADK agent that validates approved relative `.sql` files, reports only actual validator evidence, and recommends one focused next action
+* Authoritative specification: `SPEC.md`
+* Audit skill instructions: `.agents/skills/taskguard-audit/SKILL.md`
+* Antigravity is an external repository auditor and is not part of the TaskGuard runtime
 
-On branch main
-Your branch is up to date with 'origin/main'.
-nothing to commit, working tree clean
-Git checkpoint verified: git log HEAD commit is fef24c390282b9121b223d255bf655b12b525e29.
-Ignored file rules: Ignored path checks returned:
-git check-ignore app/agent.py.save -> app/agent.py.save
-git check-ignore app/.adk -> app/.adk
-Directly verified directory contents:
-text
+Your role in this run:
 
+* Perform the final full repository audit
+* Review the completed repository as an external auditor
+* Produce findings only
+* Remain read-only
+* Do not modify files
+* Do not propose or apply patches
+* Do not redesign the project
+* Do not act as the implementation driver
+* Do not install packages or change the environment
+* Do not run destructive, networked, or repository-modifying commands
+* Do not assume facts that are not supported by inspected repository evidence
 
-.agents, .git, .gitignore, .google-agents-cli, .pytest_cache, .venv, GEMINI.md, PROJECT_LOG.md, README.md, SPEC.md, agents-cli-manifest.yaml, app, artifacts, assets, bad_schema.sql, deployment, deployment_metadata.json, docs, good_schema.sql, pyproject.toml, tests, uv.lock, validate_schema.py
-Confirmed findings
-Specification and Implementation Alignment:
-The deterministic tool in 
-app/tools.py
- strictly implements input boundary checks matching 
-SPEC.md
-. It rejects absolute paths (
-tools.py:L30-L34
-), directory traversal (
-tools.py:L36-L40
-), non-SQL extensions (
-tools.py:L42-L46
-), and missing files (
-tools.py:L58-L62
-).
-It resolves paths safely using relative_to (
-tools.py:L50-L56
-), preventing paths outside the project root directory.
-Subprocess execution is performed securely using an argument list (
-tools.py:L64-L68
-) and captures standard streams and exit codes without spawning a shell or modifying the target files (
-tools.py:L71-L78
-).
-The TaskGuard instruction in 
-app/agent.py:L27-L59
- strictly demands evidence-based reporting, refusal for rejected paths, and output formatting with the status, exit code, evidence, and one focused next step.
-Documentation Alignment:
-README.md
-, 
-SPEC.md
-, and 
-PROJECT_LOG.md
- are fully aligned across the following categories checked:
-Core functionality and scope definition: Grounded read-only validation of SQL schema files inside the project.
-Exclusions and limitations: Refusal of traversal, absolute paths, non-SQL, missing files, cloud requirements, vector databases, RAG, and memory.
-The three official demonstration cases: Verification of valid schema success, invalid schema reporting, and traversal rejection.
-Quota-safe testing strategy: Skipping live model integration tests unless explicitly opted in with environment variables and keys.
-Live Gemini validation results: Recorded results showing 6 passed, 0 failures, and 12 warnings.
-Antigravity's role: Bounded, external, read-only repository auditor.
-Current repository and submission status: Clean Git workspace under main branch, target submission of July 1, 2026.
-Deterministic Test Coverage:
-Unit tests in 
-tests/unit/test_tools.py
- cover all 6 input contract and security checks, confirming they pass deterministically without hitting Gemini API quotas.
-The evaluation dataset structure test in 
-tests/unit/test_eval_dataset.py
- verifies the existence of all 5 scenarios without needing API keys.
-Official Demonstrations:
-The workspace contains files in 
-docs/demonstrations/
- covering 
-Valid Schema Passes
-, 
-Invalid Schema Reports Complete Evidence
-, and 
-Directory Traversal Rejection
-. These reports are consistent with the validation behavior of 
-validate_schema.py
-.
-Repository Hygiene:
-There are no active credentials, private keys, or .env files committed. A detailed .gitignore file is in place and properly ignores Python caches, virtual environments, API keys, local .adk/ state, and backup files.
-Verified issues
-"No verified blocking issues were identified."
-Unverified concerns
-Live Gemini Test Execution Results:
-The success of the live integration tests (
-test_agent.py
- and 
-test_taskguard_local_eval.py
-) remains unverified by direct execution in this run, as they were skipped due to the absence of GEMINI_API_KEY and RUN_LIVE_GEMINI_TESTS=TRUE in the audit environment.
-Evidence required to confirm: Running the tests with a live Gemini API key and RUN_LIVE_GEMINI_TESTS=TRUE exported in the environment.
-Vertex AI Agent Engine Runtime Compatibility:
-The optional Vertex runtime wrapper 
-app/agent_runtime_app.py
- was skipped during testing as RUN_VERTEX_RUNTIME_TESTS was not set to TRUE.
-Evidence required to confirm: Running the integration tests in an authenticated Google Cloud project with billing enabled and the variable set.
-Submission-readiness assessment
-Ready for submission
-Explanation: The codebase is functionally complete. Deterministic test suites run and pass without a Gemini API key. Repository hygiene is maintained (clean working tree, ignored runtime states/backups, and zero exposed secrets). Documentation, specifications, and project logs are fully aligned and cover all seven evaluated categories. The project meets all acceptance criteria defined in 
-SPEC.md
-.
-One focused next action
-Finalize the submission package components, ensuring the cover image, YouTube demonstration video (under 5 minutes), and Kaggle writeup (under 2500 words) are compiled and formatted for submission by the target date.
+Permitted verification behavior:
+
+* You may inspect repository files
+* You may run read-only repository inspection commands
+* You may run the documented deterministic, quota-safe test commands when directly relevant to the audit
+* Do not rerun live Gemini tests unless explicitly instructed; instead, inspect the recorded live-test evidence and related test implementation
+* Clearly distinguish evidence you directly inspected or reproduced from evidence recorded in project documentation
+
+Final audit scope:
+
+1. Specification and implementation alignment
+
+Check whether the implementation agrees with `SPEC.md`, including:
+
+* approved relative `.sql` paths
+* rejection of absolute paths
+* rejection of directory traversal
+* rejection of non-SQL files
+* missing-file behavior
+* validator evidence reporting
+* recommendation of one focused next action
+* no arbitrary shell execution
+* no automatic SQL file modification
+
+2. Documentation alignment
+
+Check whether `README.md`, `SPEC.md`, and `PROJECT_LOG.md` agree on:
+
+* what TaskGuard does
+* what TaskGuard refuses to do
+* the three official demonstration cases
+* the quota-safe testing strategy
+* the live Gemini validation result
+* Antigravity’s external, non-runtime role
+* current repository and submission status
+
+3. Test coverage and testing claims
+
+Inspect the relevant test files and determine whether the documented claims are supported, including:
+
+* deterministic unit tests
+* evaluation-dataset structure test
+* default no-key suite
+* intentionally skipped live integration tests
+* live Gemini integration and evaluation coverage
+* the six recorded live Gemini scenarios
+* separation between local deterministic evidence and live-model evidence
+
+4. Official demonstrations
+
+Verify that the repository supports and consistently documents these three official demonstrations:
+
+* valid schema passes
+* invalid schema reports complete validator evidence
+* directory traversal is rejected
+
+5. Safety and evidence-grounding
+
+Check whether TaskGuard:
+
+* reports actual tool or validator evidence rather than inventing findings
+* maintains its path and file-type boundaries
+* avoids unsupported success claims
+* avoids automatically changing user files
+* avoids broad or unrelated recommendations
+
+6. Repository hygiene and submission readiness
+
+At a high level, inspect:
+
+* repository structure
+* environment and setup instructions
+* accidental secrets or credentials
+* tracked temporary files or generated artifacts
+* consistency of commands and file paths
+* clean testing and demonstration instructions
+* whether any verified issue appears to block submission
+
+Required evidence standard:
+
+* Every confirmed finding must be tied to inspected repository evidence
+* Include file paths and line references when available
+* Separate direct verification from documentation-only evidence
+* Do not treat “no problem found” as proof that no problem exists
+* Do not treat warnings as blocking unless repository evidence shows that they affect correctness or submission
+* Do not classify optional cleanup or stylistic preferences as blocking
+* Do not recommend new features unless a verified requirement is missing
+* Do not infer that live tests passed merely because documentation says so; label the recorded result as documentation evidence unless independently reproduced
+* Do not state that a commit hash, command result, clean git state, or directory contents were directly verified unless you quote the exact value you inspected
+* Do not claim documents are fully aligned unless you name the exact categories you checked
+
+Required output structure:
+
+Confirmed findings:
+
+* List verified strengths and successful checks
+* Identify the evidence supporting each finding
+
+Verified issues:
+
+* List only issues demonstrated by inspected evidence
+* If none were found, say: “No verified blocking issues were identified.”
+
+Unverified concerns:
+
+* List plausible concerns that could not be proven during this audit
+* Explain what evidence would be needed to confirm or dismiss each one
+* If none were identified, say so
+* Preserve the distinction between unverified live-test records and directly reproduced results
+
+Submission-readiness assessment:
+
+* State one of:
+
+  * Ready for submission
+  * Ready with a documented non-blocking limitation
+  * Not ready for submission
+* Give a brief evidence-based explanation
+
+One focused next action:
+
+* Recommend exactly one bounded next action
+* Do not recommend broad redesign, feature expansion, cloud deployment, RAG, memory, or multi-agent work
+* If no verified issue blocks submission, the next action should focus on final submission packaging rather than further implementation
+
+Files modified:
+
+* State exactly: “No files modified.”
+
+Keep the response concise, practical, and evidence-based.
