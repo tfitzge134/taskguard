@@ -1,3 +1,11 @@
+# Final Antigravity Audit Prompt
+
+This prompt is the final bounded, read-only audit prompt for the completed TaskGuard repository.
+
+Antigravity is external to the TaskGuard runtime. It is used only as a repository auditor. Any finding must be independently inspected, reproduced, and tested before a fix is accepted.
+
+---
+
 You are Antigravity performing the final bounded, read-only audit of the completed TaskGuard repository.
 
 Repository context:
