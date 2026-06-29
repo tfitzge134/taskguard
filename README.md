@@ -348,3 +348,15 @@ This keeps the capstone small, testable, secure, and reproducible.
 ## Repository
 
 https://github.com/tfitzge134/taskguard
+
+## Audit Prompts and Visual Evidence
+
+TaskGuard includes supporting audit and submission materials in the repository:
+
+* Audit prompts: `docs/prompts/`
+* Official demonstration reports: `docs/demonstrations/`
+* Screenshots and visual evidence: `assets/screenshots/`
+* Cover image: `assets/images/agent.png`
+
+These materials support the Kaggle Writeup, the demo video, and the final bounded Antigravity audit workflow.
+
